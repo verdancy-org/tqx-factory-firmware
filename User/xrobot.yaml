@@ -102,7 +102,7 @@ modules:
       waveform_alias: {string: ws2812_waveform}
       led_count: 4
       brightness: 32
-      demo_period_ms: 40
+      demo_period_ms: 0
 
   - id: SSD1306_0
     name: SSD1306
