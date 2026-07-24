@@ -1,0 +1,15 @@
+build/
+cmake-build-*/
+.cache/
+compile_commands.json
+*.elf
+*.hex
+*.bin
+*.map
+*.out
+*.log
+User/xrobot_main.hpp
+Modules/*
+!Modules/modules.yaml
+!Modules/sources.yaml
+!Modules/CMakeLists.txt

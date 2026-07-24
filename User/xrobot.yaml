@@ -1,0 +1,119 @@
+global_settings:
+  monitor_sleep_ms: 5
+
+modules:
+  - id: buttons
+    name: BitsButtonXR
+    constructor_args:
+      single_buttons:
+        - key_alias: {string: btn_enter}
+          active_level: false
+          constraints:
+            short_press_time_ms: 50
+            long_press_start_time_ms: 1000
+            long_press_period_triger_ms: 500
+            time_window_time_ms: 300
+        - key_alias: {string: btn_back}
+          active_level: true
+          constraints:
+            short_press_time_ms: 50
+            long_press_start_time_ms: 1000
+            long_press_period_triger_ms: 500
+            time_window_time_ms: 300
+        - key_alias: {string: btn_encoder}
+          active_level: false
+          constraints:
+            short_press_time_ms: 50
+            long_press_start_time_ms: 1000
+            long_press_period_triger_ms: 500
+            time_window_time_ms: 300
+        - key_alias: {string: btn_a24}
+          active_level: false
+          constraints:
+            short_press_time_ms: 50
+            long_press_start_time_ms: 1000
+            long_press_period_triger_ms: 500
+            time_window_time_ms: 300
+        - key_alias: {string: btn_b24}
+          active_level: false
+          constraints:
+            short_press_time_ms: 50
+            long_press_start_time_ms: 1000
+            long_press_period_triger_ms: 500
+            time_window_time_ms: 300
+      combined_buttons:
+        - combined_alias: {string: nav_back_alt}
+          suppress_single_keys: true
+          constituent_aliases:
+            - {string: btn_back}
+            - {string: btn_a24}
+          constraints:
+            short_press_time_ms: 50
+            long_press_start_time_ms: 1000
+            long_press_period_triger_ms: 500
+            time_window_time_ms: 300
+        - combined_alias: {string: nav_enter_alt}
+          suppress_single_keys: true
+          constituent_aliases:
+            - {string: btn_enter}
+            - {string: btn_b24}
+          constraints:
+            short_press_time_ms: 50
+            long_press_start_time_ms: 1000
+            long_press_period_triger_ms: 500
+            time_window_time_ms: 300
+
+  - id: flash
+    name: W25QXX
+    template_args:
+      BUFFER_SIZE: 128
+    constructor_args: {}
+
+  - id: dial
+    name: Dial
+    constructor_args:
+      dial_alias: {string: dial}
+      phase_a_alias: {string: dial_a}
+      phase_b_alias: {string: dial_b}
+      steps_per_detent: 4
+      reverse: false
+      poll_interval_ms: 5
+      fast_threshold_ms: 80
+      event_queue_size: 16
+
+  - id: imu
+    name: LSM6DS3TRC
+    constructor_args:
+      i2c_alias: {string: i2c_imu}
+      address: 0x6A
+      gyro_datarate: LSM6DS3TRC::DataRate::DATA_RATE_52HZ
+      accel_datarate: LSM6DS3TRC::DataRate::DATA_RATE_52HZ
+      accl_range: LSM6DS3TRC::AcclRange::RANGE_2G
+      gyro_range: LSM6DS3TRC::GyroRange::DPS_2000
+      poll_interval_ms: 20
+      gyro_topic_name: {string: lsm6ds3trc_gyro}
+      accl_topic_name: {string: lsm6ds3trc_accl}
+
+  - id: ws2812
+    name: WS2812PWM
+    template_args:
+      MaxLeds: 4
+    constructor_args:
+      waveform_alias: {string: ws2812_waveform}
+      led_count: 4
+      brightness: 32
+      demo_period_ms: 40
+
+  - id: SSD1306_0
+    name: SSD1306
+    constructor_args:
+      i2c_alias: {string: i2c_oled}
+      address: 0x3C
+      frame_topic_name: {string: display_frame}
+      chunk_bytes: 64
+
+  - id: DisplaySurface_0
+    name: DisplaySurface
+    constructor_args:
+      frame_topic_name: {string: display_frame}
+      refresh_interval_ms: 33

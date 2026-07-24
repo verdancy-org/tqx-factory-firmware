@@ -1,0 +1,8 @@
+[submodule "libxr"]
+	path = libxr
+	url = https://github.com/verdancy-org/libxr.git
+	branch = codex/mspm0-i2c-optional-dma
+[submodule "mspm0-sdk"]
+	path = mspm0-sdk
+	url = https://github.com/TexasInstruments/mspm0-sdk
+	ignore = dirty
