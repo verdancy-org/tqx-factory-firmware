@@ -8,15 +8,13 @@
 #include "DisplaySurface.hpp"
 #include "LSM6DS3TRC.hpp"
 #include "WS2812PWM.hpp"
+#include "flag.hpp"
 #include "gpio.hpp"
 #include "hardware.hpp"
 #include "message.hpp"
 #include "pwm.hpp"
 #include "timebase.hpp"
 #include "uart.hpp"
-
-namespace Factory
-{
 
 enum class Page : std::uint8_t
 {
@@ -89,80 +87,89 @@ struct Hardware
   Hardware(LibXR::HardwareContainer& hw, BitsButtonXR& buttons, Dial& dial,
            DisplaySurface& display, WS2812PWM<4>& rgb);
 
-  BitsButtonXR& buttons_;
-  Dial& dial_;
-  DisplaySurface& display_;
-  WS2812PWM<4>& rgb_;
+  BitsButtonXR& buttons;
+  Dial& dial;
+  DisplaySurface& display;
+  WS2812PWM<4>& rgb;
 
-  LibXR::GPIO* wireless_link_ = nullptr;
-  LibXR::PWM* buzzer_ = nullptr;
-  LibXR::UART* debug_uart_ = nullptr;
-  LibXR::UART* wireless_uart_ = nullptr;
+  LibXR::GPIO* wireless_link = nullptr;
+  LibXR::PWM* buzzer = nullptr;
+  LibXR::UART* debug_uart = nullptr;
+  LibXR::UART* wireless_uart = nullptr;
 };
 
 struct Sensors
 {
   Sensors();
 
-  LibXR::Topic gyro_topic_;
-  LibXR::Topic accl_topic_;
-  LibXR::Topic::ASyncSubscriber<LSM6DS3TRC::Vector3f> gyro_sub_;
-  LibXR::Topic::ASyncSubscriber<LSM6DS3TRC::Vector3f> accl_sub_;
+  LibXR::Topic gyro_topic;
+  LibXR::Topic accl_topic;
+  LibXR::Topic::ASyncSubscriber<LSM6DS3TRC::Vector3f> gyro_sub;
+  LibXR::Topic::ASyncSubscriber<LSM6DS3TRC::Vector3f> accl_sub;
 
-  LSM6DS3TRC::Vector3f last_gyro_{};
-  LSM6DS3TRC::Vector3f last_accl_{};
-  bool gyro_valid_ = false;
-  bool accl_valid_ = false;
+  LSM6DS3TRC::Vector3f last_gyro{};
+  LSM6DS3TRC::Vector3f last_accl{};
+  bool gyro_valid = false;
+  bool accl_valid = false;
 };
 
 struct Feedback
 {
-  RgbMode rgb_mode_ = RgbMode::FLOWING;
-  std::uint8_t rgb_brightness_ = 48;
-  std::uint8_t rgb_phase_ = 0;
-  std::uint32_t last_rgb_ms_ = 0;
+  RgbMode rgb_mode = RgbMode::FLOWING;
+  std::uint8_t rgb_brightness = 48;
+  std::uint8_t rgb_phase = 0;
+  std::uint32_t last_rgb_ms = 0;
 
-  bool sound_enabled_ = false;
-  bool buzzer_active_ = false;
-  std::uint32_t buzzer_off_ms_ = 0;
+  bool sound_enabled = false;
+  bool buzzer_active = false;
+  std::uint32_t buzzer_off_ms = 0;
 };
 
 struct Ui
 {
-  Page page_ = Page::MAIN_MENU;
-  std::uint8_t main_selected_ = 0;
-  std::uint8_t game_selected_ = 0;
-  std::uint8_t setting_selected_ = 0;
+  Page page = Page::MAIN_MENU;
+  std::uint8_t main_selected = 0;
+  std::uint8_t game_selected = 0;
+  std::uint8_t setting_selected = 0;
 
-  const char* last_button_ = nullptr;
-  bool dark_mode_ = false;
-  bool show_fps_ = false;
-  std::uint8_t oled_brightness_ = 100;
-  std::uint8_t robot_mood_ = 0;
+  const char* last_button = nullptr;
+  bool dark_mode = false;
+  bool show_fps = false;
+  std::uint8_t oled_brightness = 100;
+  std::uint8_t robot_mood = 0;
 
-  bool render_started_ = false;
-  bool render_requested_ = true;
-  std::uint32_t last_render_ms_ = 0;
-  std::uint32_t frame_ = 0;
+  bool render_started = false;
+  LibXR::Flag::Plain render_requested;
+  std::uint32_t last_render_ms = 0;
+  std::uint32_t frame = 0;
 };
 
 struct Game
 {
-  std::int16_t player_x_ = 20;
-  std::int16_t player_y_ = 40;
-  std::int16_t velocity_ = 0;
-  bool jump_ = false;
-  std::uint32_t score_ = 0;
+  std::int16_t player_x = 20;
+  std::int16_t player_y = 40;
+  std::int16_t velocity = 0;
+  bool jump = false;
+  std::uint32_t score = 0;
 };
 
-void InitializeFeedbackOutputs(Hardware& hardware, const Feedback& feedback);
-void RunOnce(Hardware& hardware, Sensors& sensors, Feedback& feedback, Ui& ui,
-             Game& game);
+struct Runtime
+{
+  Runtime(LibXR::HardwareContainer& hw, BitsButtonXR& buttons, Dial& dial,
+          DisplaySurface& display, WS2812PWM<4>& rgb);
+
+  Hardware hardware;
+  Sensors sensors;
+  Feedback feedback;
+  Ui ui;
+  Game game;
+};
 
 std::int16_t Wrap(std::int16_t value, std::int16_t count);
 std::int32_t ClipInt(std::int32_t value, std::int32_t lo, std::int32_t hi);
 bool IsAlias(const char* got, const char* wanted);
 std::int32_t ScaleToInt(float value, float scale);
+void RequestRender(Ui& ui);
 
 MonoCanvas::Color Fg(const Ui& ui);
 MonoCanvas::Color Bg(const Ui& ui);
@@ -189,8 +196,7 @@ void UpdateBuzzer(Hardware& hardware, Feedback& feedback, std::uint32_t now);
 void StopBuzzer(Hardware& hardware, Feedback& feedback);
 
 bool IsAnimatedPage(const Ui& ui);
-void Render(Hardware& hardware, const Sensors& sensors, Feedback& feedback, Ui& ui,
-            Game& game);
+void Render(Runtime& rt);
 void DrawMenu(Hardware& hardware, const Ui& ui, const char* title, const MenuItem* items,
               std::size_t count, std::uint8_t selected);
 void DrawSettings(Hardware& hardware, const Ui& ui, const Feedback& feedback);
@@ -209,4 +215,5 @@ void DrawPlane(Hardware& hardware, const Ui& ui, Game& game);
 void DrawBrick(Hardware& hardware, const Ui& ui, Game& game);
 void DrawSnake(Hardware& hardware, const Ui& ui, Game& game);
 
-}  // namespace Factory
+void ApplyInitialFeedbackOutputs(Runtime& rt);
+void RunFactorySlot(Runtime& rt);

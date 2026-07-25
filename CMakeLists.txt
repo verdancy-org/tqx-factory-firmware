@@ -31,13 +31,14 @@ include("${CMAKE_SOURCE_DIR}/cmake/LibXR.CMake")
 set(APP_SOURCES
   "${CMAKE_SOURCE_DIR}/User/main.c"
   "${CMAKE_SOURCE_DIR}/User/app_main.cpp"
+  "${CMAKE_SOURCE_DIR}/User/src/scheduler.cpp"
   "${CMAKE_SOURCE_DIR}/User/src/games.cpp"
   "${CMAKE_SOURCE_DIR}/User/src/input.cpp"
   "${CMAKE_SOURCE_DIR}/User/src/light.cpp"
   "${CMAKE_SOURCE_DIR}/User/src/navigation.cpp"
   "${CMAKE_SOURCE_DIR}/User/src/sensors.cpp"
-  "${CMAKE_SOURCE_DIR}/User/src/task.cpp"
   "${CMAKE_SOURCE_DIR}/User/src/ui.cpp"
+  "${CMAKE_SOURCE_DIR}/User/src/utils.cpp"
   "${CMAKE_SOURCE_DIR}/Core/syscalls_stub.c"
   "${MSPM0_STARTUP_FILE}"
   "${SYSCFG_C_FILE}")
@@ -47,7 +48,6 @@ add_executable(${PROJECT_NAME}.elf ${APP_SOURCES})
 target_include_directories(${PROJECT_NAME}.elf PRIVATE
   "${CMAKE_SOURCE_DIR}/Core"
   "${CMAKE_SOURCE_DIR}/User"
-  "${CMAKE_SOURCE_DIR}/User/inc"
   ${MSPM0_COMMON_INCLUDE_DIRS})
 
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE

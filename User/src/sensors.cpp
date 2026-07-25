@@ -1,31 +1,26 @@
-#include "factory.hpp"
-
-namespace Factory
-{
+#include "runtime.hpp"
 
 void DrainImu(Sensors& sensors, Ui& ui)
 {
-  if (sensors.gyro_sub_.Available())
+  if (sensors.gyro_sub.Available())
   {
-    sensors.last_gyro_ = sensors.gyro_sub_.GetData();
-    sensors.gyro_valid_ = true;
-    sensors.gyro_sub_.StartWaiting();
-    if (ui.page_ == Page::GYRO)
+    sensors.last_gyro = sensors.gyro_sub.GetData();
+    sensors.gyro_valid = true;
+    sensors.gyro_sub.StartWaiting();
+    if (ui.page == Page::GYRO)
     {
-      ui.render_requested_ = true;
+      RequestRender(ui);
     }
   }
 
-  if (sensors.accl_sub_.Available())
+  if (sensors.accl_sub.Available())
   {
-    sensors.last_accl_ = sensors.accl_sub_.GetData();
-    sensors.accl_valid_ = true;
-    sensors.accl_sub_.StartWaiting();
-    if (ui.page_ == Page::GYRO)
+    sensors.last_accl = sensors.accl_sub.GetData();
+    sensors.accl_valid = true;
+    sensors.accl_sub.StartWaiting();
+    if (ui.page == Page::GYRO)
     {
-      ui.render_requested_ = true;
+      RequestRender(ui);
     }
   }
 }
-
-}  // namespace Factory

@@ -5,8 +5,8 @@
 
 #include "MSPM0TimedWaveform.hpp"
 #include "app_framework.hpp"
-#include "factory_xrobot_main.hpp"
 #include "gpio.hpp"
+#include "hardware.hpp"
 #include "libxr.hpp"
 #include "mspm0_gpio.hpp"
 #include "mspm0_i2c.hpp"
@@ -17,6 +17,12 @@
 #include "ramfs.hpp"
 #include "thread.hpp"
 #include "ti_msp_dl_config.h"
+
+namespace Scheduler
+{
+void Init(LibXR::HardwareContainer& hw, LibXR::ApplicationManager& manager);
+void Update();
+}  // namespace Scheduler
 
 extern "C" void app_main(void)
 {
@@ -92,5 +98,14 @@ extern "C" void app_main(void)
   debug_led.Write(false);
 
   (void)timebase;
-  XRobotFactoryMain(hw);
+
+  static ApplicationManager manager;
+  Scheduler::Init(hw, manager);
+
+  while (true)
+  {
+    manager.MonitorAll();
+    Scheduler::Update();
+    Thread::Sleep(5);
+  }
 }

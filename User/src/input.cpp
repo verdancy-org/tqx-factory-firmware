@@ -1,14 +1,11 @@
-#include "factory.hpp"
-
-namespace Factory
-{
+#include "runtime.hpp"
 
 void DrainInputs(Hardware& hardware, Ui& ui, Feedback& feedback, Game& game)
 {
   BitsButtonXR::ButtonEventResult btn{};
-  while (hardware.buttons_.GetEventResult(btn))
+  while (hardware.buttons.GetEventResult(btn))
   {
-    ui.last_button_ = btn.key_alias;
+    ui.last_button = btn.key_alias;
     if (btn.event_type != BitsButtonXR::ButtonEvent::PRESSED)
     {
       continue;
@@ -22,14 +19,14 @@ void DrainInputs(Hardware& hardware, Ui& ui, Feedback& feedback, Game& game)
     {
       OnBack(ui);
     }
-    ui.render_requested_ = true;
+    RequestRender(ui);
   }
 
   Dial::EventResult dial{};
-  while (hardware.dial_.GetEventResult(dial))
+  while (hardware.dial.GetEventResult(dial))
   {
     ApplyDial(ui, feedback, game, dial.delta);
-    ui.render_requested_ = true;
+    RequestRender(ui);
   }
 }
 
@@ -44,5 +41,3 @@ bool IsBack(const char* alias)
   return IsAlias(alias, "btn_back") || IsAlias(alias, "btn_a24") ||
          IsAlias(alias, "nav_back_alt");
 }
-
-}  // namespace Factory
