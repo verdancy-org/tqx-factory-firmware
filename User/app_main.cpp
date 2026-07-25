@@ -18,28 +18,6 @@
 #include "thread.hpp"
 #include "ti_msp_dl_config.h"
 
-namespace
-{
-
-void InitBoardI2C0()
-{
-  DL_GPIO_initPeripheralInputFunctionFeatures(
-      OLED_SDA_IOMUX, IOMUX_PINCM1_PF_I2C0_SDA, DL_GPIO_INVERSION_DISABLE,
-      DL_GPIO_RESISTOR_NONE, DL_GPIO_HYSTERESIS_ENABLE, DL_GPIO_WAKEUP_DISABLE);
-  DL_GPIO_enableHiZ(OLED_SDA_IOMUX);
-
-  DL_GPIO_initPeripheralInputFunctionFeatures(
-      OLED_SCL_IOMUX, IOMUX_PINCM2_PF_I2C0_SCL, DL_GPIO_INVERSION_DISABLE,
-      DL_GPIO_RESISTOR_NONE, DL_GPIO_HYSTERESIS_ENABLE, DL_GPIO_WAKEUP_DISABLE);
-  DL_GPIO_enableHiZ(OLED_SCL_IOMUX);
-
-  DL_I2C_reset(I2C0);
-  DL_I2C_enablePower(I2C0);
-  delay_cycles(POWER_STARTUP_DELAY);
-}
-
-}  // namespace
-
 extern "C" void app_main(void)
 {
   using namespace LibXR;
@@ -76,9 +54,9 @@ extern "C" void app_main(void)
   static MSPM0GPIO dial_b(DIAL_PORT, DIAL_B_PIN, DIAL_B_IOMUX);
   static MSPM0TimedWaveform ws2812_waveform(
       MSPM0_TIMED_WAVEFORM_INIT(WS2812, GPIO_WS2812_C0, DMA_CH0));
-  InitBoardI2C0();
   static MSPM0I2C i2c_imu(
-      {I2C0, I2C0_INT_IRQn, 40000000U, 400000U, MSPM0I2C::ResolveIndex(I2C0_INT_IRQn)},
+      {I2C_OLED_IMU_INST, I2C_OLED_IMU_INST_INT_IRQN, 40000000U,
+       I2C_OLED_IMU_BUS_SPEED_HZ, MSPM0I2C::ResolveIndex(I2C_OLED_IMU_INST_INT_IRQN)},
       RawData(i2c_stage.data(), i2c_stage.size()), 8U, {400000U});
 
   static MSPM0SPI spi_flash(

@@ -123,6 +123,22 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 
 
 
+
+/* Defines for I2C_OLED_IMU */
+#define I2C_OLED_IMU_INST                                                   I2C0
+#define I2C_OLED_IMU_INST_IRQHandler                             I2C0_IRQHandler
+#define I2C_OLED_IMU_INST_INT_IRQN                                 I2C0_INT_IRQn
+#define I2C_OLED_IMU_BUS_SPEED_HZ                                         400000
+#define GPIO_I2C_OLED_IMU_SDA_PORT                                         GPIOA
+#define GPIO_I2C_OLED_IMU_SDA_PIN                                  DL_GPIO_PIN_0
+#define GPIO_I2C_OLED_IMU_IOMUX_SDA                               (IOMUX_PINCM1)
+#define GPIO_I2C_OLED_IMU_IOMUX_SDA_FUNC                IOMUX_PINCM1_PF_I2C0_SDA
+#define GPIO_I2C_OLED_IMU_SCL_PORT                                         GPIOA
+#define GPIO_I2C_OLED_IMU_SCL_PIN                                  DL_GPIO_PIN_1
+#define GPIO_I2C_OLED_IMU_IOMUX_SCL                               (IOMUX_PINCM2)
+#define GPIO_I2C_OLED_IMU_IOMUX_SCL_FUNC                IOMUX_PINCM2_PF_I2C0_SCL
+
+
 /* Defines for UART_DEBUG */
 #define UART_DEBUG_INST                                                    UART0
 #define UART_DEBUG_INST_FREQUENCY                                       40000000
@@ -202,15 +218,6 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 /* Defines for LINK: GPIOB.23 with pinCMx 51 on package pin 22 */
 #define WIRELESS_LINK_PIN                                       (DL_GPIO_PIN_23)
 #define WIRELESS_LINK_IOMUX                                      (IOMUX_PINCM51)
-/* Port definition for Pin Group OLED */
-#define OLED_PORT                                                        (GPIOA)
-
-/* Defines for SDA: GPIOA.0 with pinCMx 1 on package pin 33 */
-#define OLED_SDA_PIN                                             (DL_GPIO_PIN_0)
-#define OLED_SDA_IOMUX                                            (IOMUX_PINCM1)
-/* Defines for SCL: GPIOA.1 with pinCMx 2 on package pin 34 */
-#define OLED_SCL_PIN                                             (DL_GPIO_PIN_1)
-#define OLED_SCL_IOMUX                                            (IOMUX_PINCM2)
 /* Defines for ENTER: GPIOB.21 with pinCMx 49 on package pin 20 */
 #define KEY_ENTER_PORT                                                   (GPIOB)
 #define KEY_ENTER_PIN                                           (DL_GPIO_PIN_21)
@@ -253,6 +260,7 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 void SYSCFG_DL_BUZZER_init(void);
 void SYSCFG_DL_WS2812_init(void);
 void SYSCFG_DL_TIMER_TICK_init(void);
+void SYSCFG_DL_I2C_OLED_IMU_init(void);
 void SYSCFG_DL_UART_DEBUG_init(void);
 void SYSCFG_DL_UART_WIRELESS_init(void);
 void SYSCFG_DL_SPI_FLASH_init(void);

@@ -3,12 +3,12 @@
 #include "BitsButtonXR.hpp"
 #include "Dial.hpp"
 #include "DisplaySurface.hpp"
-#include "FactoryFirmware.hpp"
 #include "LSM6DS3TRC.hpp"
 #include "SSD1306.hpp"
 #include "W25QXX.hpp"
 #include "WS2812PWM.hpp"
 #include "app_framework.hpp"
+#include "factory.hpp"
 #include "thread.hpp"
 
 inline void XRobotFactoryMain(LibXR::HardwareContainer& hw)
@@ -38,14 +38,21 @@ inline void XRobotFactoryMain(LibXR::HardwareContainer& hw)
   static DisplaySurface display(hw, app, "display_frame", 33);
   static SSD1306 oled(hw, app, "i2c_oled", 0x3C, "display_frame", 64);
   static WS2812PWM<4> ws2812(hw, app, "ws2812_waveform", 4, 48, 0);
-  static FactoryFirmware factory(hw, app, buttons, dial, display, ws2812);
+  static Factory::Hardware factory_hardware(hw, buttons, dial, display, ws2812);
+  static Factory::Sensors factory_sensors;
+  static Factory::Feedback factory_feedback;
+  static Factory::Ui factory_ui;
+  static Factory::Game factory_game;
 
   (void)flash;
   (void)imu;
   (void)oled;
+  Factory::InitializeFeedbackOutputs(factory_hardware, factory_feedback);
   while (true)
   {
     app.MonitorAll();
+    Factory::RunOnce(factory_hardware, factory_sensors, factory_feedback, factory_ui,
+                     factory_game);
     LibXR::Thread::Sleep(5);
   }
 }

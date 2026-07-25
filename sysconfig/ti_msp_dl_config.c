@@ -58,6 +58,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     SYSCFG_DL_BUZZER_init();
     SYSCFG_DL_WS2812_init();
     SYSCFG_DL_TIMER_TICK_init();
+    SYSCFG_DL_I2C_OLED_IMU_init();
     SYSCFG_DL_UART_DEBUG_init();
     SYSCFG_DL_UART_WIRELESS_init();
     SYSCFG_DL_SPI_FLASH_init();
@@ -106,6 +107,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_TimerG_reset(BUZZER_INST);
     DL_TimerA_reset(WS2812_INST);
     DL_TimerA_reset(TIMER_TICK_INST);
+    DL_I2C_reset(I2C_OLED_IMU_INST);
     DL_UART_Main_reset(UART_DEBUG_INST);
     DL_UART_Main_reset(UART_WIRELESS_INST);
     DL_SPI_reset(SPI_FLASH_INST);
@@ -116,6 +118,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_TimerG_enablePower(BUZZER_INST);
     DL_TimerA_enablePower(WS2812_INST);
     DL_TimerA_enablePower(TIMER_TICK_INST);
+    DL_I2C_enablePower(I2C_OLED_IMU_INST);
     DL_UART_Main_enablePower(UART_DEBUG_INST);
     DL_UART_Main_enablePower(UART_WIRELESS_INST);
     DL_SPI_enablePower(SPI_FLASH_INST);
@@ -133,6 +136,18 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
     DL_GPIO_enableOutput(GPIO_BUZZER_C1_PORT, GPIO_BUZZER_C1_PIN);
     DL_GPIO_initPeripheralOutputFunction(GPIO_WS2812_C0_IOMUX,GPIO_WS2812_C0_IOMUX_FUNC);
     DL_GPIO_enableOutput(GPIO_WS2812_C0_PORT, GPIO_WS2812_C0_PIN);
+
+
+	DL_GPIO_initPeripheralInputFunctionFeatures(
+		 GPIO_I2C_OLED_IMU_IOMUX_SDA, GPIO_I2C_OLED_IMU_IOMUX_SDA_FUNC,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_NONE,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+	DL_GPIO_initPeripheralInputFunctionFeatures(
+		 GPIO_I2C_OLED_IMU_IOMUX_SCL, GPIO_I2C_OLED_IMU_IOMUX_SCL_FUNC,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_NONE,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+    DL_GPIO_enableHiZ(GPIO_I2C_OLED_IMU_IOMUX_SDA);
+    DL_GPIO_enableHiZ(GPIO_I2C_OLED_IMU_IOMUX_SCL);
 
     DL_GPIO_initPeripheralOutputFunction(
         GPIO_UART_DEBUG_IOMUX_TX, GPIO_UART_DEBUG_IOMUX_TX_FUNC);
@@ -162,10 +177,6 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_DOWN,
 		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
-    DL_GPIO_initDigitalOutput(OLED_SDA_IOMUX);
-
-    DL_GPIO_initDigitalOutput(OLED_SCL_IOMUX);
-
     DL_GPIO_initDigitalInputFeatures(KEY_ENTER_IOMUX,
 		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
 		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
@@ -194,10 +205,6 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
 		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
-    DL_GPIO_setPins(GPIOA, OLED_SDA_PIN |
-		OLED_SCL_PIN);
-    DL_GPIO_enableOutput(GPIOA, OLED_SDA_PIN |
-		OLED_SCL_PIN);
     DL_GPIO_clearPins(GPIOB, DEBUG_LED_PIN_22_PIN |
 		FLASH_CS_PIN);
     DL_GPIO_enableOutput(GPIOB, DEBUG_LED_PIN_22_PIN |
@@ -286,7 +293,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_SYSCTL_init(void)
     DL_SYSCTL_setBORThreshold(DL_SYSCTL_BOR_THRESHOLD_LEVEL_0);
     DL_SYSCTL_setFlashWaitState(DL_SYSCTL_FLASH_WAIT_STATE_2);
 
-    
+
 	DL_SYSCTL_setSYSOSCFreq(DL_SYSCTL_SYSOSC_FREQ_BASE);
 	/* Set default configuration */
 	DL_SYSCTL_disableHFXT();
@@ -356,7 +363,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_BUZZER_init(void) {
     DL_TimerG_enableClock(BUZZER_INST);
 
 
-    
+
     DL_TimerG_setCCPDirection(BUZZER_INST , DL_TIMER_CC1_OUTPUT );
 
 
@@ -400,7 +407,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_WS2812_init(void) {
     DL_TimerA_enableClock(WS2812_INST);
 
 
-    
+
     DL_TimerA_setCCPDirection(WS2812_INST , DL_TIMER_CC0_OUTPUT );
 
 
@@ -446,6 +453,32 @@ SYSCONFIG_WEAK void SYSCFG_DL_TIMER_TICK_init(void) {
 
 }
 
+
+static const DL_I2C_ClockConfig gI2C_OLED_IMUClockConfig = {
+    .clockSel = DL_I2C_CLOCK_BUSCLK,
+    .divideRatio = DL_I2C_CLOCK_DIVIDE_1,
+};
+
+SYSCONFIG_WEAK void SYSCFG_DL_I2C_OLED_IMU_init(void) {
+
+    DL_I2C_setClockConfig(I2C_OLED_IMU_INST,
+        (DL_I2C_ClockConfig *) &gI2C_OLED_IMUClockConfig);
+    DL_I2C_disableAnalogGlitchFilter(I2C_OLED_IMU_INST);
+
+    /* Configure Controller Mode */
+    DL_I2C_resetControllerTransfer(I2C_OLED_IMU_INST);
+    /* Set frequency to 400000 Hz*/
+    DL_I2C_setTimerPeriod(I2C_OLED_IMU_INST, 9);
+    DL_I2C_setControllerTXFIFOThreshold(I2C_OLED_IMU_INST, DL_I2C_TX_FIFO_LEVEL_EMPTY);
+    DL_I2C_setControllerRXFIFOThreshold(I2C_OLED_IMU_INST, DL_I2C_RX_FIFO_LEVEL_BYTES_1);
+    DL_I2C_enableControllerClockStretching(I2C_OLED_IMU_INST);
+
+
+    /* Enable module */
+    DL_I2C_enableController(I2C_OLED_IMU_INST);
+
+
+}
 
 static const DL_UART_Main_ClockConfig gUART_DEBUGClockConfig = {
     .clockSel    = DL_UART_MAIN_CLOCK_BUSCLK,
