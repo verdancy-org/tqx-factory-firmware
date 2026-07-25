@@ -8,9 +8,10 @@ the original OLED UI/game sources verbatim.
 ## Layout
 
 - `sysconfig/` contains the MSPM0G3519 LQFP-64(PM) SysConfig source and generated `ti_msp_dl_config.*`.
-- `User/app_main.cpp` creates the LibXR hardware container and runs the factory XRobot entry, matching the no-board-layer BSP style.
-- `User/FactoryFirmware.hpp` implements the factory demo surface: menu, RGB effects, IMU view, UART monitor, robot face, and mini game demos.
-- `User/factory_xrobot_main.hpp` is the hand-written generated-style entry used by `User/app_main.cpp`.
+- `User/app_main.cpp` creates the LibXR hardware container, owns the cooperative main loop, and calls the user scheduler.
+- `User/src/scheduler.cpp` instantiates the Factory XRobot modules and runs the cooperative user slots.
+- `User/src/ui.cpp`, `light.cpp`, `input.cpp`, `navigation.cpp`, `sensors.cpp`, and `games.cpp` split the Factory logic by concern.
+- `User/src/runtime.hpp` is a private source-level header for shared Factory runtime declarations used by the scheduler slots; it is not a public API.
 - `Modules/` contains XRobot modules, including external modules plus the board-specific `WS2812PWM`.
 - `User/xrobot.yaml` is the XRobot module instance config.
 - `User/xrobot_main.hpp` remains ignored; regenerate it only if you want to return to CLI-generated module wiring.
@@ -51,7 +52,7 @@ Default instantiated modules:
   leaving TIMG8 QEI free for external encoders.
 - `W25QXX` on SPI1 + PB6 chip select.
 - `LSM6DS3TRC` on I2C0 PA0/PA1, matching the factory firmware's 7-bit `0x6A` IMU.
-- `WS2812PWM` on TIMA1/PB26 + DMA CH0 via the WS2812-local `TimedWaveform` backend. Its built-in demo is disabled so `FactoryFirmware` can own RGB effects.
+- `WS2812PWM` on TIMA1/PB26 + DMA CH0 via the WS2812-local `TimedWaveform` backend. Its built-in demo is disabled so the Factory user task can own RGB effects.
 
 ## Factory Firmware Equivalent
 
