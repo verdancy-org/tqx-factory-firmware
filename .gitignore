@@ -12,3 +12,5 @@ Modules/*
 !Modules/modules.yaml
 !Modules/sources.yaml
 !Modules/CMakeLists.txt
+!Modules/EventBinder/
+!Modules/EventBinder/**

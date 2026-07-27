@@ -9,7 +9,9 @@
 #include "WS2812PWM.hpp"
 #include "SSD1306.hpp"
 #include "DisplaySurface.hpp"
+#include "InputEvents.hpp"
 #include "Scheduler.hpp"
+#include "EventBinder.hpp"
 
 static void XRobotMain(LibXR::HardwareContainer &hw) {
   using namespace LibXR;
@@ -40,7 +42,14 @@ static void XRobotMain(LibXR::HardwareContainer &hw) {
   static WS2812PWM<4> ws2812(hw, appmgr, "ws2812_waveform", 4, 32, 0);
   static SSD1306 SSD1306_0(hw, appmgr, "i2c_oled", 60, "display_frame", 64);
   static DisplaySurface DisplaySurface_0(hw, appmgr, "display_frame", 33);
-  static Scheduler scheduler(hw, appmgr, buttons, dial, DisplaySurface_0, ws2812);
+  static InputEvents input_events(hw, appmgr, buttons, dial);
+  static Scheduler scheduler(hw, appmgr, DisplaySurface_0, ws2812);
+  static EventBinder event_binder(
+      hw,
+      appmgr,
+      {{"input", input_events}, {"scheduler", scheduler}},
+      {{{{"input", InputEvents::Event::ENTER, "scheduler", Scheduler::Event::ENTER}, {"input", InputEvents::Event::BACK, "scheduler", Scheduler::Event::BACK}, {"input", InputEvents::Event::DIAL_CLOCKWISE, "scheduler", Scheduler::Event::DIAL_CLOCKWISE}, {"input", InputEvents::Event::DIAL_COUNTER_CLOCKWISE, "scheduler", Scheduler::Event::DIAL_COUNTER_CLOCKWISE}, {"input", InputEvents::Event::DIAL_FAST_CLOCKWISE, "scheduler", Scheduler::Event::DIAL_FAST_CLOCKWISE}, {"input", InputEvents::Event::DIAL_FAST_COUNTER_CLOCKWISE, "scheduler", Scheduler::Event::DIAL_FAST_COUNTER_CLOCKWISE}}}}
+  );
 
   while (true) {
     Timer::Refresh();

@@ -3,11 +3,10 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "BitsButtonXR.hpp"
-#include "Dial.hpp"
 #include "DisplaySurface.hpp"
 #include "LSM6DS3TRC.hpp"
 #include "WS2812PWM.hpp"
+#include "event.hpp"
 #include "flag.hpp"
 #include "gpio.hpp"
 #include "hardware.hpp"
@@ -84,11 +83,8 @@ constexpr std::size_t CountOf(const T (&)[N])
 
 struct Hardware
 {
-  Hardware(LibXR::HardwareContainer& hw, BitsButtonXR& buttons, Dial& dial,
-           DisplaySurface& display, WS2812PWM<4>& rgb);
+  Hardware(LibXR::HardwareContainer& hw, DisplaySurface& display, WS2812PWM<4>& rgb);
 
-  BitsButtonXR& buttons;
-  Dial& dial;
   DisplaySurface& display;
   WS2812PWM<4>& rgb;
 
@@ -155,10 +151,10 @@ struct Game
 
 struct Runtime
 {
-  Runtime(LibXR::HardwareContainer& hw, BitsButtonXR& buttons, Dial& dial,
-          DisplaySurface& display, WS2812PWM<4>& rgb);
+  Runtime(LibXR::HardwareContainer& hw, DisplaySurface& display, WS2812PWM<4>& rgb);
 
   Hardware hardware;
+  LibXR::Event events;
   Sensors sensors;
   Feedback feedback;
   Ui ui;
@@ -181,10 +177,7 @@ void TextSelected(Hardware& hardware, const Ui& ui, std::int16_t y, const char* 
 void Header(Hardware& hardware, const Ui& ui, const char* title);
 void Footer(Hardware& hardware, const Ui& ui, const char* left, const char* right);
 
-void DrainInputs(Hardware& hardware, Ui& ui, Feedback& feedback, Game& game);
 void DrainImu(Sensors& sensors, Ui& ui);
-bool IsEnter(const char* alias);
-bool IsBack(const char* alias);
 void OnEnter(Hardware& hardware, Ui& ui, Feedback& feedback, Game& game);
 void OnBack(Ui& ui);
 void ApplyDial(Ui& ui, Feedback& feedback, Game& game, std::int32_t delta);

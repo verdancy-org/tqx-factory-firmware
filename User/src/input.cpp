@@ -1,34 +1,9 @@
+#include "InputEvents.hpp"
+
 #include "runtime.hpp"
 
-void DrainInputs(Hardware& hardware, Ui& ui, Feedback& feedback, Game& game)
+namespace
 {
-  BitsButtonXR::ButtonEventResult btn{};
-  while (hardware.buttons.GetEventResult(btn))
-  {
-    ui.last_button = btn.key_alias;
-    if (btn.event_type != BitsButtonXR::ButtonEvent::PRESSED)
-    {
-      continue;
-    }
-
-    if (IsEnter(btn.key_alias))
-    {
-      OnEnter(hardware, ui, feedback, game);
-    }
-    else if (IsBack(btn.key_alias))
-    {
-      OnBack(ui);
-    }
-    RequestRender(ui);
-  }
-
-  Dial::EventResult dial{};
-  while (hardware.dial.GetEventResult(dial))
-  {
-    ApplyDial(ui, feedback, game, dial.delta);
-    RequestRender(ui);
-  }
-}
 
 bool IsEnter(const char* alias)
 {
@@ -40,4 +15,56 @@ bool IsBack(const char* alias)
 {
   return IsAlias(alias, "btn_back") || IsAlias(alias, "btn_a24") ||
          IsAlias(alias, "nav_back_alt");
+}
+
+}  // namespace
+
+InputEvents::InputEvents(LibXR::HardwareContainer& hw,
+                         LibXR::ApplicationManager& manager, BitsButtonXR& buttons,
+                         Dial& dial)
+    : buttons_(buttons), dial_(dial)
+{
+  UNUSED(hw);
+  manager.Register(*this);
+}
+
+void InputEvents::Update()
+{
+  BitsButtonXR::ButtonEventResult btn{};
+  while (buttons_.GetEventResult(btn))
+  {
+    if (btn.event_type != BitsButtonXR::ButtonEvent::PRESSED)
+    {
+      continue;
+    }
+
+    if (IsEnter(btn.key_alias))
+    {
+      events_.Active(Id(Event::ENTER));
+    }
+    else if (IsBack(btn.key_alias))
+    {
+      events_.Active(Id(Event::BACK));
+    }
+  }
+
+  Dial::EventResult dial{};
+  while (dial_.GetEventResult(dial))
+  {
+    switch (dial.event_type)
+    {
+      case Dial::Event::CLOCKWISE:
+        events_.Active(Id(Event::DIAL_CLOCKWISE));
+        break;
+      case Dial::Event::COUNTER_CLOCKWISE:
+        events_.Active(Id(Event::DIAL_COUNTER_CLOCKWISE));
+        break;
+      case Dial::Event::FAST_CLOCKWISE:
+        events_.Active(Id(Event::DIAL_FAST_CLOCKWISE));
+        break;
+      case Dial::Event::FAST_COUNTER_CLOCKWISE:
+        events_.Active(Id(Event::DIAL_FAST_COUNTER_CLOCKWISE));
+        break;
+    }
+  }
 }
