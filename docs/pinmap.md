@@ -5,8 +5,9 @@ MSPM0G3519 LQFP-64(PM).
 
 | Function | Peripheral | Pins | LibXR/XRobot aliases |
 | --- | --- | --- | --- |
-| Debug UART | UART0 | TX PA10, RX PA11 | `uart_debug`, `debug_uart`, `console` |
+| Debug UART | UART0 | TX PA10, RX PA11 | `uart_debug`, `debug_uart` |
 | Wireless UART | UART7 | TX PB17, RX PB18 | `uart_wireless`, `wireless_uart` |
+| Console UART / STDIO | UART3 | TX PB2, RX PB3 | `uart_console`, `console`, `stdio_uart` |
 | W25QXX Flash | SPI1 + GPIO CS | SCLK PB9, MOSI PB8, MISO PB7, CS PB6 | `spi_w25qxx`, `spi_flash`, `spi_w25qxx_cs` |
 | Debug LED | GPIO | PB22 | `debug_led`, `led`, `status_led` |
 | OLED / I2C shared bus | I2C0 | SDA PA0, SCL PA1 | `i2c_imu`, `i2c0`, `i2c_oled` |
@@ -22,3 +23,4 @@ Notes:
 - The factory IMU code targets LSM6DS3TRC over I2C0 and reports `WHO_AM_I = 0x6A`; this BSP instantiates the local `LSM6DS3TRC` module by default.
 - The provided SysConfig source uses LQFP-64(PM). The previous placeholder `untitled.syscfg` used LQFP-48(PT), which does not match the factory pinout.
 - The front-panel dial is decoded through GPIO interrupts and no longer consumes `TIMG8`; `TIMG8` and `TIMG9` remain available as hardware QEI candidates subject to pinmux conflicts.
+- STDIO is bound to UART3 (`console`) with a 1 KiB TX software buffer. LibXR STDIO still preserves only the prefix that fits in the remaining write queue, so very large or bursty writes should be chunked or made blocking.

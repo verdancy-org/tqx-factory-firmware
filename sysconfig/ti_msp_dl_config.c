@@ -43,6 +43,7 @@
 DL_TimerG_backupConfig gBUZZERBackup;
 DL_TimerA_backupConfig gWS2812Backup;
 DL_TimerA_backupConfig gTIMER_TICKBackup;
+DL_UART_Main_backupConfig gUART_CONSOLEBackup;
 DL_SPI_backupConfig gSPI_FLASHBackup;
 
 /*
@@ -61,13 +62,14 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     SYSCFG_DL_I2C_OLED_IMU_init();
     SYSCFG_DL_UART_DEBUG_init();
     SYSCFG_DL_UART_WIRELESS_init();
+    SYSCFG_DL_UART_CONSOLE_init();
     SYSCFG_DL_SPI_FLASH_init();
     SYSCFG_DL_DMA_init();
     /* Ensure backup structures have no valid state */
 	gBUZZERBackup.backupRdy 	= false;
 	gWS2812Backup.backupRdy 	= false;
 	gTIMER_TICKBackup.backupRdy 	= false;
-
+	gUART_CONSOLEBackup.backupRdy 	= false;
 	gSPI_FLASHBackup.backupRdy 	= false;
 
 }
@@ -82,6 +84,7 @@ SYSCONFIG_WEAK bool SYSCFG_DL_saveConfiguration(void)
 	retStatus &= DL_TimerG_saveConfiguration(BUZZER_INST, &gBUZZERBackup);
 	retStatus &= DL_TimerA_saveConfiguration(WS2812_INST, &gWS2812Backup);
 	retStatus &= DL_TimerA_saveConfiguration(TIMER_TICK_INST, &gTIMER_TICKBackup);
+	retStatus &= DL_UART_Main_saveConfiguration(UART_CONSOLE_INST, &gUART_CONSOLEBackup);
 	retStatus &= DL_SPI_saveConfiguration(SPI_FLASH_INST, &gSPI_FLASHBackup);
 
     return retStatus;
@@ -95,6 +98,7 @@ SYSCONFIG_WEAK bool SYSCFG_DL_restoreConfiguration(void)
 	retStatus &= DL_TimerG_restoreConfiguration(BUZZER_INST, &gBUZZERBackup, false);
 	retStatus &= DL_TimerA_restoreConfiguration(WS2812_INST, &gWS2812Backup, false);
 	retStatus &= DL_TimerA_restoreConfiguration(TIMER_TICK_INST, &gTIMER_TICKBackup, false);
+	retStatus &= DL_UART_Main_restoreConfiguration(UART_CONSOLE_INST, &gUART_CONSOLEBackup);
 	retStatus &= DL_SPI_restoreConfiguration(SPI_FLASH_INST, &gSPI_FLASHBackup);
 
     return retStatus;
@@ -110,6 +114,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_I2C_reset(I2C_OLED_IMU_INST);
     DL_UART_Main_reset(UART_DEBUG_INST);
     DL_UART_Main_reset(UART_WIRELESS_INST);
+    DL_UART_Main_reset(UART_CONSOLE_INST);
     DL_SPI_reset(SPI_FLASH_INST);
 
 
@@ -121,6 +126,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_I2C_enablePower(I2C_OLED_IMU_INST);
     DL_UART_Main_enablePower(UART_DEBUG_INST);
     DL_UART_Main_enablePower(UART_WIRELESS_INST);
+    DL_UART_Main_enablePower(UART_CONSOLE_INST);
     DL_SPI_enablePower(SPI_FLASH_INST);
 
     delay_cycles(POWER_STARTUP_DELAY);
@@ -157,6 +163,10 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
         GPIO_UART_WIRELESS_IOMUX_TX, GPIO_UART_WIRELESS_IOMUX_TX_FUNC);
     DL_GPIO_initPeripheralInputFunction(
         GPIO_UART_WIRELESS_IOMUX_RX, GPIO_UART_WIRELESS_IOMUX_RX_FUNC);
+    DL_GPIO_initPeripheralOutputFunction(
+        GPIO_UART_CONSOLE_IOMUX_TX, GPIO_UART_CONSOLE_IOMUX_TX_FUNC);
+    DL_GPIO_initPeripheralInputFunction(
+        GPIO_UART_CONSOLE_IOMUX_RX, GPIO_UART_CONSOLE_IOMUX_RX_FUNC);
 
     DL_GPIO_initPeripheralOutputFunction(
         GPIO_SPI_FLASH_IOMUX_SCLK, GPIO_SPI_FLASH_IOMUX_SCLK_FUNC);
@@ -551,6 +561,41 @@ SYSCONFIG_WEAK void SYSCFG_DL_UART_WIRELESS_init(void)
 
 
     DL_UART_Main_enable(UART_WIRELESS_INST);
+}
+static const DL_UART_Main_ClockConfig gUART_CONSOLEClockConfig = {
+    .clockSel    = DL_UART_MAIN_CLOCK_BUSCLK,
+    .divideRatio = DL_UART_MAIN_CLOCK_DIVIDE_RATIO_1
+};
+
+static const DL_UART_Main_Config gUART_CONSOLEConfig = {
+    .mode        = DL_UART_MAIN_MODE_NORMAL,
+    .direction   = DL_UART_MAIN_DIRECTION_TX_RX,
+    .flowControl = DL_UART_MAIN_FLOW_CONTROL_NONE,
+    .parity      = DL_UART_MAIN_PARITY_NONE,
+    .wordLength  = DL_UART_MAIN_WORD_LENGTH_8_BITS,
+    .stopBits    = DL_UART_MAIN_STOP_BITS_ONE
+};
+
+SYSCONFIG_WEAK void SYSCFG_DL_UART_CONSOLE_init(void)
+{
+    DL_UART_Main_setClockConfig(UART_CONSOLE_INST, (DL_UART_Main_ClockConfig *) &gUART_CONSOLEClockConfig);
+
+    DL_UART_Main_init(UART_CONSOLE_INST, (DL_UART_Main_Config *) &gUART_CONSOLEConfig);
+    /*
+     * Configure baud rate by setting oversampling and baud rate divisors.
+     *  Target baud rate: 115200
+     *  Actual baud rate: 115190.78
+     */
+    DL_UART_Main_setOversampling(UART_CONSOLE_INST, DL_UART_OVERSAMPLING_RATE_16X);
+    DL_UART_Main_setBaudRateDivisor(UART_CONSOLE_INST, UART_CONSOLE_IBRD_80_MHZ_115200_BAUD, UART_CONSOLE_FBRD_80_MHZ_115200_BAUD);
+
+
+    /* Configure Interrupts */
+    DL_UART_Main_enableInterrupt(UART_CONSOLE_INST,
+                                 DL_UART_MAIN_INTERRUPT_RX);
+
+
+    DL_UART_Main_enable(UART_CONSOLE_INST);
 }
 
 static const DL_SPI_Config gSPI_FLASH_config = {
