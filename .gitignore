@@ -8,7 +8,6 @@ compile_commands.json
 *.map
 *.out
 *.log
-User/xrobot_main.hpp
 Modules/*
 !Modules/modules.yaml
 !Modules/sources.yaml

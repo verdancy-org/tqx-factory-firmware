@@ -8,13 +8,14 @@ the original OLED UI/game sources verbatim.
 ## Layout
 
 - `sysconfig/` contains the MSPM0G3519 LQFP-64(PM) SysConfig source and generated `ti_msp_dl_config.*`.
-- `User/app_main.cpp` creates the LibXR hardware container, owns the cooperative main loop, and calls the user scheduler.
-- `User/src/scheduler.cpp` instantiates the Factory XRobot modules and runs the cooperative user slots.
+- `User/app_main.cpp` creates the LibXR hardware container and enters the generated `XRobotMain()` loop.
+- `User/xrobot_main.hpp` is generated from `User/xrobot.yaml` and instantiates the XRobot modules plus the user scheduler.
+- `User/src/scheduler.cpp` implements the Factory user scheduler registered into the XRobot loop.
 - `User/src/ui.cpp`, `light.cpp`, `input.cpp`, `navigation.cpp`, `sensors.cpp`, and `games.cpp` split the Factory logic by concern.
 - `User/src/runtime.hpp` is a private source-level header for shared Factory runtime declarations used by the scheduler slots; it is not a public API.
 - `Modules/` contains XRobot modules, including external modules plus the board-specific `WS2812PWM`.
 - `User/xrobot.yaml` is the XRobot module instance config.
-- `User/xrobot_main.hpp` remains ignored; regenerate it only if you want to return to CLI-generated module wiring.
+- Regenerate `User/xrobot_main.hpp` after editing `User/xrobot.yaml`.
 
 ## Dependencies
 

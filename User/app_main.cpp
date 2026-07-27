@@ -17,12 +17,7 @@
 #include "ramfs.hpp"
 #include "thread.hpp"
 #include "ti_msp_dl_config.h"
-
-namespace Scheduler
-{
-void Init(LibXR::HardwareContainer& hw, LibXR::ApplicationManager& manager);
-void Update();
-}  // namespace Scheduler
+#include "xrobot_main.hpp"
 
 extern "C" void app_main(void)
 {
@@ -99,13 +94,5 @@ extern "C" void app_main(void)
 
   (void)timebase;
 
-  static ApplicationManager manager;
-  Scheduler::Init(hw, manager);
-
-  while (true)
-  {
-    manager.MonitorAll();
-    Scheduler::Update();
-    Thread::Sleep(5);
-  }
+  XRobotMain(hw);
 }

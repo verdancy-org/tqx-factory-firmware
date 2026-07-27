@@ -48,6 +48,7 @@ add_executable(${PROJECT_NAME}.elf ${APP_SOURCES})
 target_include_directories(${PROJECT_NAME}.elf PRIVATE
   "${CMAKE_SOURCE_DIR}/Core"
   "${CMAKE_SOURCE_DIR}/User"
+  "${CMAKE_SOURCE_DIR}/User/src"
   ${MSPM0_COMMON_INCLUDE_DIRS})
 
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE

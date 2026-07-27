@@ -1,12 +1,9 @@
+#include "Scheduler.hpp"
+
 #include "runtime.hpp"
 
 #include "SSD1306.hpp"
 #include "W25QXX.hpp"
-
-namespace
-{
-Runtime* runtime = nullptr;
-}
 
 Hardware::Hardware(LibXR::HardwareContainer& hw, BitsButtonXR& buttons, Dial& dial,
                    DisplaySurface& display, WS2812PWM<4>& rgb)
@@ -71,58 +68,28 @@ void RunFactorySlot(Runtime& rt)
   }
 }
 
-namespace Scheduler
+Scheduler::Scheduler(LibXR::HardwareContainer& hw, LibXR::ApplicationManager& manager,
+                     BitsButtonXR& buttons, Dial& dial, DisplaySurface& display,
+                     WS2812PWM<4>& rgb)
 {
+  static Runtime factory_runtime(hw, buttons, dial, display, rgb);
+  static bool initialized = false;
 
-void Init(LibXR::HardwareContainer& hw, LibXR::ApplicationManager& manager)
+  runtime_ = &factory_runtime;
+  if (!initialized)
+  {
+    ApplyInitialFeedbackOutputs(*runtime_);
+    initialized = true;
+  }
+  manager.Register(*this);
+}
+
+void Scheduler::Update()
 {
-  if (runtime != nullptr)
+  if (runtime_ == nullptr)
   {
     return;
   }
 
-  static BitsButtonXR buttons(
-      hw, manager,
-      {
-          {"btn_enter", false, {50, 1000, 500, 300}},
-          {"btn_back", true, {50, 1000, 500, 300}},
-          {"btn_encoder", false, {50, 1000, 500, 300}},
-          {"btn_a24", false, {50, 1000, 500, 300}},
-          {"btn_b24", false, {50, 1000, 500, 300}},
-      },
-      {
-          {"nav_back_alt", true, {"btn_back", "btn_a24"}, {50, 1000, 500, 300}},
-          {"nav_enter_alt", true, {"btn_enter", "btn_b24"}, {50, 1000, 500, 300}},
-      });
-
-  static W25QXX<128> flash(hw, manager);
-  static Dial dial(hw, manager, "dial", "dial_a", "dial_b", 4, false, 5, 80, 16);
-  static LSM6DS3TRC imu(hw, manager, "i2c_imu", 0x6A, LSM6DS3TRC::DataRate::DATA_RATE_52HZ,
-                        LSM6DS3TRC::DataRate::DATA_RATE_52HZ,
-                        LSM6DS3TRC::AcclRange::RANGE_2G,
-                        LSM6DS3TRC::GyroRange::DPS_2000, 20, "lsm6ds3trc_gyro",
-                        "lsm6ds3trc_accl");
-  static DisplaySurface display(hw, manager, "display_frame", 33);
-  static SSD1306 oled(hw, manager, "i2c_oled", 0x3C, "display_frame", 64);
-  static WS2812PWM<4> ws2812(hw, manager, "ws2812_waveform", 4, 48, 0);
-  static Runtime factory_runtime(hw, buttons, dial, display, ws2812);
-
-  (void)flash;
-  (void)imu;
-  (void)oled;
-
-  runtime = &factory_runtime;
-  ApplyInitialFeedbackOutputs(*runtime);
+  RunFactorySlot(*runtime_);
 }
-
-void Update()
-{
-  if (runtime == nullptr)
-  {
-    return;
-  }
-
-  RunFactorySlot(*runtime);
-}
-
-}  // namespace Scheduler

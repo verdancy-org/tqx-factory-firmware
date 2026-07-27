@@ -117,3 +117,11 @@ modules:
     constructor_args:
       frame_topic_name: {string: display_frame}
       refresh_interval_ms: 33
+
+  - id: scheduler
+    name: Scheduler
+    constructor_args:
+      buttons: "@buttons"
+      dial: "@dial"
+      display: "@DisplaySurface_0"
+      rgb: "@ws2812"
