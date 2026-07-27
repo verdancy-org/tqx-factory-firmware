@@ -168,25 +168,9 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define GPIO_UART_WIRELESS_IOMUX_TX                              (IOMUX_PINCM43)
 #define GPIO_UART_WIRELESS_IOMUX_RX_FUNC               IOMUX_PINCM44_PF_UART7_RX
 #define GPIO_UART_WIRELESS_IOMUX_TX_FUNC               IOMUX_PINCM43_PF_UART7_TX
-#define UART_WIRELESS_BAUD_RATE                                         (115200)
-#define UART_WIRELESS_IBRD_40_MHZ_115200_BAUD                               (21)
-#define UART_WIRELESS_FBRD_40_MHZ_115200_BAUD                               (45)
-/* Defines for UART_CONSOLE */
-#define UART_CONSOLE_INST                                                  UART3
-#define UART_CONSOLE_INST_FREQUENCY                                     80000000
-#define UART_CONSOLE_INST_IRQHandler                            UART3_IRQHandler
-#define UART_CONSOLE_INST_INT_IRQN                                UART3_INT_IRQn
-#define GPIO_UART_CONSOLE_RX_PORT                                          GPIOB
-#define GPIO_UART_CONSOLE_TX_PORT                                          GPIOB
-#define GPIO_UART_CONSOLE_RX_PIN                                   DL_GPIO_PIN_3
-#define GPIO_UART_CONSOLE_TX_PIN                                   DL_GPIO_PIN_2
-#define GPIO_UART_CONSOLE_IOMUX_RX                               (IOMUX_PINCM16)
-#define GPIO_UART_CONSOLE_IOMUX_TX                               (IOMUX_PINCM15)
-#define GPIO_UART_CONSOLE_IOMUX_RX_FUNC                IOMUX_PINCM16_PF_UART3_RX
-#define GPIO_UART_CONSOLE_IOMUX_TX_FUNC                IOMUX_PINCM15_PF_UART3_TX
-#define UART_CONSOLE_BAUD_RATE                                          (115200)
-#define UART_CONSOLE_IBRD_80_MHZ_115200_BAUD                                (43)
-#define UART_CONSOLE_FBRD_80_MHZ_115200_BAUD                                (26)
+#define UART_WIRELESS_BAUD_RATE                                           (9600)
+#define UART_WIRELESS_IBRD_40_MHZ_9600_BAUD                                (260)
+#define UART_WIRELESS_FBRD_40_MHZ_9600_BAUD                                 (27)
 
 
 
@@ -279,7 +263,6 @@ void SYSCFG_DL_TIMER_TICK_init(void);
 void SYSCFG_DL_I2C_OLED_IMU_init(void);
 void SYSCFG_DL_UART_DEBUG_init(void);
 void SYSCFG_DL_UART_WIRELESS_init(void);
-void SYSCFG_DL_UART_CONSOLE_init(void);
 void SYSCFG_DL_SPI_FLASH_init(void);
 void SYSCFG_DL_DMA_init(void);
 

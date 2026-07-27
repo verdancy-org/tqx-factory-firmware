@@ -25,7 +25,6 @@ extern "C" void app_main(void)
 
   alignas(CACHE_LINE_SIZE) static std::array<std::uint8_t, 128> uart_debug_rx{};
   alignas(CACHE_LINE_SIZE) static std::array<std::uint8_t, 64> uart_wireless_rx{};
-  alignas(CACHE_LINE_SIZE) static std::array<std::uint8_t, 64> uart_console_rx{};
   alignas(CACHE_LINE_SIZE) static std::array<std::uint8_t, 512> spi_rx{};
   alignas(CACHE_LINE_SIZE) static std::array<std::uint8_t, 512> spi_tx{};
   alignas(CACHE_LINE_SIZE) static std::array<std::uint8_t, 64> i2c_stage{};
@@ -35,12 +34,10 @@ extern "C" void app_main(void)
 
   static MSPM0UART uart_debug(
       MSPM0_UART_INIT(UART_DEBUG, uart_debug_rx.data(), uart_debug_rx.size(), 8, 256));
-  static MSPM0UART uart_wireless(MSPM0_UART_INIT(UART_WIRELESS, uart_wireless_rx.data(),
-                                                 uart_wireless_rx.size(), 8, 128));
-  // UART_CONSOLE is the STDIO path; keep enough staging for
+  // UART_WIRELESS is the STDIO path; keep enough staging for
   // formatted log lines so ordinary output is not prefix-truncated.
-  static MSPM0UART uart_console(MSPM0_UART_INIT(UART_CONSOLE, uart_console_rx.data(),
-                                                uart_console_rx.size(), 16, 1024));
+  static MSPM0UART uart_wireless(MSPM0_UART_INIT(UART_WIRELESS, uart_wireless_rx.data(),
+                                                 uart_wireless_rx.size(), 16, 1024));
 
   static MSPM0GPIO debug_led(DEBUG_LED_PORT, DEBUG_LED_PIN_22_PIN,
                              DEBUG_LED_PIN_22_IOMUX);
@@ -74,8 +71,7 @@ extern "C" void app_main(void)
   static HardwareContainer hw(
       Entry<RamFS>{ramfs, {"ramfs", "fs"}},
       Entry<UART>{uart_debug, {"uart_debug", "debug_uart"}},
-      Entry<UART>{uart_wireless, {"uart_wireless", "wireless_uart"}},
-      Entry<UART>{uart_console, {"uart_console", "console", "stdio_uart"}},
+      Entry<UART>{uart_wireless, {"uart_wireless", "wireless_uart", "console", "stdio_uart"}},
       Entry<GPIO>{debug_led, {"debug_led", "led", "status_led"}},
       Entry<GPIO>{flash_cs, {"spi_w25qxx_cs", "flash_cs", "w25qxx_cs"}},
       Entry<GPIO>{wireless_link, {"wireless_link"}},
@@ -91,8 +87,8 @@ extern "C" void app_main(void)
       Entry<I2C>{i2c_imu, {"i2c_imu", "i2c0", "i2c_oled"}},
       Entry<SPI>{spi_flash, {"spi_w25qxx", "spi_flash"}});
 
-  STDIO::read_ = &uart_console._read_port;
-  STDIO::write_ = &uart_console._write_port;
+  STDIO::read_ = &uart_wireless._read_port;
+  STDIO::write_ = &uart_wireless._write_port;
 
   debug_led.SetConfig(
       {.direction = GPIO::Direction::OUTPUT_PUSH_PULL, .pull = GPIO::Pull::DOWN});
